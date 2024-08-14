@@ -12,7 +12,7 @@ import {
 } from '@toeverything/infra';
 import clsx from 'clsx';
 import type { CSSProperties } from 'react';
-import { memo, Suspense, useCallback, useMemo } from 'react';
+import { memo, Suspense, useCallback, useEffect, useMemo } from 'react';
 import { useLocation } from 'react-router-dom';
 
 import { useAppSettingHelper } from '../hooks/affine/use-app-setting-helper';
@@ -46,8 +46,16 @@ const PageDetailEditorMain = memo(function PageDetailEditorMain({
   page,
   onLoad,
 }: PageDetailEditorProps & { page: BlockSuiteDoc }) {
+  const location = useLocation();
+  const viewMode = useMemo(() => {
+    const searchParams = new URLSearchParams(location.search);
+    return searchParams.get('view') as DocMode | null;
+  }, [location.search]);
+
   const editor = useService(EditorService).editor;
   const mode = useLiveData(editor.mode$);
+  const primaryMode = useLiveData(editor.doc.primaryMode$);
+
   const isSharedMode = editor.isSharedMode;
   const { appSettings } = useAppSettingHelper();
 
@@ -84,6 +92,14 @@ const PageDetailEditorMain = memo(function PageDetailEditorMain({
     },
     [onLoad, page]
   );
+
+  useEffect(() => {
+    if (viewMode) {
+      editor.setMode(viewMode);
+    } else {
+      editor.setMode(primaryMode);
+    }
+  }, [editor, primaryMode, viewMode]);
 
   return (
     <Editor
