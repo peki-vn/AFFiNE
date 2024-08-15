@@ -16,7 +16,8 @@ import {
 } from '@blocksuite/blocks';
 import { type FrameworkProvider } from '@toeverything/infra';
 
-import { createLinkedWidgetConfig } from './linked-widget';
+import { createEdgelessElementToolbarWidgetConfig } from './widgets/edgeless-element-toolbar';
+import { createLinkedWidgetConfig } from './widgets/linked';
 
 function customLoadFonts(service: RootService): void {
   if (runtimeConfig.isSelfHosted) {
@@ -68,6 +69,8 @@ export function createEdgelessRootBlockSpec(
     service: withAffineRootService(EdgelessRootService),
     config: {
       linkedWidget: createLinkedWidgetConfig(framework),
+      edgelessElementToolbarWidget:
+        createEdgelessElementToolbarWidgetConfig(framework),
     },
   };
 }
