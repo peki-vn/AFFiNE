@@ -6,12 +6,7 @@ import { useSharingUrl } from '@affine/core/hooks/affine/use-share-url';
 import { track } from '@affine/core/mixpanel';
 import { useIsActiveView } from '@affine/core/modules/workbench';
 import { WorkspaceFlavour } from '@affine/env/workspace';
-import {
-  DocService,
-  useLiveData,
-  useServiceOptional,
-  type WorkspaceMetadata,
-} from '@toeverything/infra';
+import { type WorkspaceMetadata } from '@toeverything/infra';
 import { useEffect } from 'react';
 
 export function useRegisterCopyLinkCommands({
@@ -24,15 +19,11 @@ export function useRegisterCopyLinkCommands({
   const isActiveView = useIsActiveView();
   const workspaceId = workspaceMeta.id;
   const isCloud = workspaceMeta.flavour === WorkspaceFlavour.AFFINE_CLOUD;
+
   const { onClickCopyLink } = useSharingUrl({
     workspaceId,
     pageId: docId,
-    urlType: 'workspace',
   });
-
-  // TODO(@JimmFly): use current view
-  const docService = useServiceOptional(DocService);
-  const currentMode = useLiveData(docService?.doc.mode$);
 
   useEffect(() => {
     const unsubs: Array<() => void> = [];
@@ -48,17 +39,13 @@ export function useRegisterCopyLinkCommands({
         label: '',
         icon: null,
         run() {
-          track.$.cmdk.general.copyShareLink({ type: 'private' });
-
-          isActiveView &&
-            isCloud &&
-            currentMode &&
-            onClickCopyLink(currentMode);
+          track.$.cmdk.general.copyShareLink();
+          isActiveView && isCloud && onClickCopyLink();
         },
       })
     );
     return () => {
       unsubs.forEach(unsub => unsub());
     };
-  }, [currentMode, docId, isActiveView, isCloud, onClickCopyLink]);
+  }, [docId, isActiveView, isCloud, onClickCopyLink]);
 }

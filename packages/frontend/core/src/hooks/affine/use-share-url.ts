@@ -3,60 +3,72 @@ import { track } from '@affine/core/mixpanel';
 import { getAffineCloudBaseUrl } from '@affine/core/modules/cloud/services/fetch';
 import { useI18n } from '@affine/i18n';
 import type { Disposable } from '@blocksuite/global/utils';
-import type { DocMode } from '@toeverything/infra';
+import { type DocMode } from '@toeverything/infra';
 import { useCallback, useEffect, useState } from 'react';
 
 import { useActiveBlocksuiteEditor } from '../use-block-suite-editor';
 
-type UrlType = 'share' | 'workspace';
-
 type UseSharingUrl = {
   workspaceId: string;
   pageId: string;
-  urlType: UrlType;
   shareView?: DocMode;
 };
 
 const generateUrl = ({
   workspaceId,
   pageId,
-  urlType,
   blockId,
   shareView,
 }: UseSharingUrl & { blockId?: string }) => {
-  // to generate a private url like https://app.affine.app/workspace/123/456
-  // or https://app.affine.app/workspace/123/456#block-123
-
-  // to generate a public url like https://app.affine.app/share/123/456
+  // to generate a url like https://app.affine.pro/workspace/123/456
+  // or https://app.affine.pro/workspace/123/456#block-123
+  // or https://app.affine.pro/workspace/123/456?view=edgeless
   const baseUrl = getAffineCloudBaseUrl();
   if (!baseUrl) return null;
 
   try {
     return new URL(
-      `${baseUrl}/${urlType}/${workspaceId}/${pageId}${shareView ? `?view=${shareView}` : ''}${urlType === 'workspace' && blockId ? `#${blockId}` : ''}`
+      `${baseUrl}/workspace/${workspaceId}/${pageId}${shareView ? `?view=${shareView}` : ''}${blockId ? `#${blockId}` : ''}`
     ).toString();
   } catch (e) {
     return null;
   }
 };
 
-export const useSharingUrl = ({
-  workspaceId,
-  pageId,
-  urlType,
-}: UseSharingUrl) => {
+const getShareLinkType = ({
+  view,
+  blockId,
+}: {
+  view?: DocMode;
+  blockId?: string;
+}) => {
+  if (view === 'page') {
+    return 'doc';
+  } else if (view === 'edgeless') {
+    return 'whiteboard';
+  } else if (blockId) {
+    return 'block';
+  } else {
+    return 'default';
+  }
+};
+
+export const useSharingUrl = ({ workspaceId, pageId }: UseSharingUrl) => {
   const t = useI18n();
   const [blockId, setBlockId] = useState<string>('');
   const [editor] = useActiveBlocksuiteEditor();
 
   const onClickCopyLink = useCallback(
-    (view: DocMode) => {
+    (view?: DocMode) => {
       const sharingUrl = generateUrl({
         workspaceId,
         pageId,
-        urlType,
-        blockId: blockId.length > 0 ? blockId : undefined,
-        shareView: view,
+        blockId,
+        shareView: view, // if view is not provided, use the current view
+      });
+      const type = getShareLinkType({
+        view,
+        blockId,
       });
       if (sharingUrl) {
         navigator.clipboard
@@ -70,7 +82,7 @@ export const useSharingUrl = ({
             console.error(err);
           });
         track.$.sharePanel.$.copyShareLink({
-          type: urlType === 'share' ? 'public' : 'private',
+          type,
         });
       } else {
         notify.error({
@@ -78,13 +90,13 @@ export const useSharingUrl = ({
         });
       }
     },
-    [workspaceId, pageId, urlType, blockId, t]
+    [blockId, pageId, t, workspaceId]
   );
 
   useEffect(() => {
     let disposable: Disposable | null = null;
     const selectManager = editor?.host?.selection;
-    if (urlType !== 'workspace' || !selectManager) {
+    if (!selectManager) {
       return;
     }
 
@@ -108,7 +120,7 @@ export const useSharingUrl = ({
     return () => {
       disposable?.dispose();
     };
-  }, [editor?.host?.selection, urlType]);
+  }, [editor?.host?.selection]);
   return {
     onClickCopyLink,
   };

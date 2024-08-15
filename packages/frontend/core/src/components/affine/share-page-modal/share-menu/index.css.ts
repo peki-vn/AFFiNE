@@ -47,49 +47,87 @@ export const exportItemStyle = style({
   padding: '4px',
   transition: 'all 0.3s',
 });
+export const copyLinkContainerStyle = style({
+  padding: '4px',
+  display: 'flex',
+  alignItems: 'center',
+  width: '100%',
+  position: 'relative',
+});
+export const copyLinkButtonStyle = style({
+  flex: 1,
+  padding: '4px 12px',
+  paddingRight: '6px',
+  borderRight: 'none',
+  borderTopRightRadius: '0',
+  borderBottomRightRadius: '0',
+  color: 'transparent',
+  position: 'initial',
+});
+export const copyLinkLabelContainerStyle = style({
+  width: '100%',
+  padding: '4px 12px',
+  borderRight: 'none',
+  borderTopRightRadius: '0',
+  borderBottomRightRadius: '0',
+  position: 'relative',
+});
+export const copyLinkLabelStyle = style({
+  position: 'absolute',
+  textAlign: 'end',
+  top: '50%',
+  left: '50%',
+  transform: 'translateX(-50%) translateY(-50%)',
+  lineHeight: '20px',
+  color: cssVarV2('text/pureWhite'),
+});
+export const copyLinkShortcutStyle = style({
+  position: 'absolute',
+  textAlign: 'end',
+  top: '50%',
+  right: '52px',
+  transform: 'translateY(-50%)',
+  opacity: 0.5,
+  lineHeight: '20px',
+  color: cssVarV2('text/pureWhite'),
+});
 export const copyLinkTriggerStyle = style({
   width: '100%',
   padding: '4px 12px',
+  paddingLeft: '4px',
   display: 'flex',
+  border: `1px solid ${cssVarV2('button/innerBlackBorder')}`,
+  flex: 0,
   justifyContent: 'end',
   alignItems: 'center',
   gap: '4px',
   position: 'relative',
   backgroundColor: cssVarV2('button/primary'),
   color: cssVarV2('button/pureWhiteText'),
+  borderLeft: 'none',
+  borderTopLeftRadius: '0',
+  borderBottomLeftRadius: '0',
   ':hover': {
     backgroundColor: cssVarV2('button/primary'),
     color: cssVarV2('button/pureWhiteText'),
+  },
+  '::before': {
+    content: '""',
+    position: 'absolute',
+    left: '0',
+    top: '0',
+    height: '100%',
+    width: '1px',
+    backgroundColor: cssVarV2('button/innerBlackBorder'),
   },
 });
 globalStyle(`${copyLinkTriggerStyle} svg`, {
   color: cssVarV2('button/pureWhiteText'),
   transform: 'translateX(2px)',
 });
-export const copyLinkLabelStyle = style({
-  position: 'absolute',
-  top: '50%',
-  left: '50%',
-  transform: 'translateX(-50%) translateY(-50%)',
-  lineHeight: '20px',
-});
-export const copyLinkShortcutStyle = style({
-  position: 'absolute',
-  right: '36px',
-  paddingRight: '8px',
-  opacity: 0.5,
-  lineHeight: '20px',
-});
 export const copyLinkMenuItemStyle = style({
   padding: '4px',
   transition: 'all 0.3s',
-});
-export const dividerStyle = style({
-  width: '1px',
-  height: '100%',
-  backgroundColor: cssVarV2('button/innerBlackBorder'),
-  position: 'absolute',
-  right: '0',
 });
 export const descriptionStyle = style({
   wordWrap: 'break-word',

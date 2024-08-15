@@ -105,6 +105,7 @@ export const AFFiNESharePage = (props: ShareMenuProps) => {
       return;
     }
     try {
+      // TODO(@JimmFly): remove mode when we have a better way to handle it
       await shareService.share.enableShare(
         mode === 'edgeless' ? PublicPageMode.Edgeless : PublicPageMode.Page
       );
@@ -175,49 +176,21 @@ export const AFFiNESharePage = (props: ShareMenuProps) => {
 
   const isMac = environment.isBrowser && environment.isMacOs;
 
-  const onShareModeChange = useAsyncCallback(
-    async (value: DocMode) => {
-      try {
-        if (isSharedPage) {
-          await shareService.share.changeShare(
-            value === 'edgeless' ? PublicPageMode.Edgeless : PublicPageMode.Page
-          );
-        }
-      } catch (err) {
-        notify.error({
-          title:
-            t[
-              'com.affine.share-menu.confirm-modify-mode.notification.fail.title'
-            ](),
-          message:
-            t[
-              'com.affine.share-menu.confirm-modify-mode.notification.fail.message'
-            ](),
-        });
-        console.error(err);
-      }
-    },
-    [isSharedPage, shareService.share, t]
-  );
-
   const { onClickCopyLink } = useSharingUrl({
     workspaceId,
     pageId: editor.doc.id,
-    urlType: 'share',
   });
 
   const onCopyPageLink = useCallback(() => {
-    onShareModeChange('page');
     onClickCopyLink('page');
-  }, [onClickCopyLink, onShareModeChange]);
+  }, [onClickCopyLink]);
   const onCopyEdgelessLink = useCallback(() => {
-    onShareModeChange('edgeless');
     onClickCopyLink('edgeless');
-  }, [onClickCopyLink, onShareModeChange]);
+  }, [onClickCopyLink]);
   const onCopyBlockLink = useCallback(() => {
     // TODO(@JimmFly): handle frame
-    onClickCopyLink(currentDocMode);
-  }, [currentDocMode, onClickCopyLink]);
+    onClickCopyLink();
+  }, [onClickCopyLink]);
 
   if (isLoading) {
     // TODO(@eyhn): loading and error UI
@@ -297,13 +270,20 @@ export const AFFiNESharePage = (props: ShareMenuProps) => {
           <div className={styles.labelStyle}>
             {t['com.affine.share-menu.option.permission.label']()}
           </div>
-          <Button
-            className={styles.menuTriggerStyle}
-            style={{ cursor: 'not-allowed' }}
-            disabled
+          <Menu
+            contentOptions={{
+              align: 'end',
+            }}
+            items={
+              <MenuItem>
+                {t['com.affine.share-menu.option.permission.can-edit']()}
+              </MenuItem>
+            }
           >
-            {t['com.affine.share-menu.option.permission.can-edit']()}
-          </Button>
+            <MenuTrigger className={styles.menuTriggerStyle} disabled>
+              {t['com.affine.share-menu.option.permission.can-edit']()}
+            </MenuTrigger>
+          </Menu>
         </div>
       </div>
       {isOwner && (
@@ -315,12 +295,23 @@ export const AFFiNESharePage = (props: ShareMenuProps) => {
           {t['com.affine.share-menu.navigate.workspace']()}
         </div>
       )}
-      <div style={{ padding: '4px' }}>
+      <div className={styles.copyLinkContainerStyle}>
+        <Button
+          className={styles.copyLinkButtonStyle}
+          onClick={onCopyBlockLink}
+          variant="primary"
+          withoutHover
+        >
+          <span className={styles.copyLinkLabelStyle}>
+            {t['com.affine.share-menu.copy']()}
+          </span>
+          <span className={styles.copyLinkShortcutStyle}>
+            {isMac ? '⌘ + ⌥ + C' : 'Ctrl + Shift + C'}
+          </span>
+          {t['com.affine.share-menu.copy']()}
+        </Button>
         <Menu
           contentOptions={{
-            style: {
-              minWidth: '260px',
-            },
             align: 'end',
           }}
           items={
@@ -371,15 +362,7 @@ export const AFFiNESharePage = (props: ShareMenuProps) => {
           <MenuTrigger
             className={styles.copyLinkTriggerStyle}
             data-testid="share-menu-copy-link-button"
-          >
-            <span className={styles.copyLinkLabelStyle}>
-              {t['com.affine.share-menu.copy']()}
-            </span>
-            <span className={styles.copyLinkShortcutStyle}>
-              {isMac ? '⌘ + ⌥ + C' : 'Ctrl + Shift + C'}
-              <span className={styles.dividerStyle} />
-            </span>
-          </MenuTrigger>
+          />
         </Menu>
       </div>
 

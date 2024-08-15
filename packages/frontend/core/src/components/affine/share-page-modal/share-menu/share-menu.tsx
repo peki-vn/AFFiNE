@@ -1,10 +1,10 @@
-import { Tabs } from '@affine/component';
+import { Tabs, Tooltip } from '@affine/component';
 import { Button } from '@affine/component/ui/button';
 import { Menu } from '@affine/component/ui/menu';
 import { ShareService } from '@affine/core/modules/share-doc';
 import { WorkspaceFlavour } from '@affine/env/workspace';
 import { useI18n } from '@affine/i18n';
-import { LockIcon, UnlockIcon } from '@blocksuite/icons/rc';
+import { LockIcon, PublishIcon } from '@blocksuite/icons/rc';
 import type { Doc } from '@blocksuite/store';
 import {
   useLiveData,
@@ -59,14 +59,20 @@ const DefaultShareButton = forwardRef(function DefaultShareButton(
   }, [shareService]);
 
   return (
-    <Button ref={ref} className={styles.button}>
-      <div className={styles.buttonContainer}>
-        {shared ? <UnlockIcon fontSize={16} /> : <LockIcon fontSize={16} />}
-        {shared
-          ? t['com.affine.share-menu.sharedButton']()
-          : t['com.affine.share-menu.shareButton']()}
-      </div>
-    </Button>
+    <Tooltip
+      content={
+        shared
+          ? t['com.affine.share-menu.option.link.readonly.description']()
+          : t['com.affine.share-menu.option.link.no-access.description']()
+      }
+    >
+      <Button ref={ref} className={styles.button}>
+        <div className={styles.buttonContainer}>
+          {shared ? <PublishIcon fontSize={16} /> : <LockIcon fontSize={16} />}
+          {t['com.affine.share-menu.shareButton']()}
+        </div>
+      </Button>
+    </Tooltip>
   );
 });
 
