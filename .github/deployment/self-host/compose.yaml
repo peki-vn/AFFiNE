@@ -33,6 +33,8 @@ services:
       # Telemetry allows us to collect data on how you use the affine. This data will helps us improve the app and provide better features.
       # Uncomment next line if you wish to quit telemetry.
       # - TELEMETRY_ENABLE=false
+    labels:
+      - traefik.http.services.affine.loadbalancer.server.port=3010
   redis:
     image: redis
     container_name: affine_redis
