@@ -7,6 +7,8 @@ services:
     # ports:
     #   - '3010:3010'
     #   - '5555:5555'
+    expose:
+      - 3010
     depends_on:
       redis:
         condition: service_healthy
